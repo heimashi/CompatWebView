@@ -20,6 +20,7 @@
     <div class="article-detail">
         <div class="body">
             <div class="title">还在用花呗淘宝你就out了</div>
+            <p><input type="button" value="testJsCallJava" onclick="testJsCallJava();"/></p>
             <p class="info" doc="12 tail">作者：<span doc="blue">Clever</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2015-07-03
             </p>
             <p>
@@ -28,15 +29,12 @@
     </div>
 
     <script type="text/javascript">
-            var res = CC_FUND.requestLogin();
-            alert("REQ:"+res);
-
-			function responseLoginInfo(json){
-				alert("RES:"+json);
+			function testJsCallJava(){
+				JInterface.testJsCallJava("jsCallJava success")
 			}
 
-			function share(){
-			    alert("share");
+			function javaCallJs(){
+			    alert("javaCallJs success");
 			}
 
     </script>
