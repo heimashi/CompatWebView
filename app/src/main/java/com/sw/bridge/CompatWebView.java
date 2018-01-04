@@ -22,6 +22,7 @@ public class CompatWebView extends WebView {
 
     private boolean isInjectCompatJsFlag = false;
     private static final String DEFAULT_SCHEME = "CompatScheme";
+    private static final String JAVASCRIPT_ANNOTATION = "@android.webkit.JavascriptInterface()";
     private String scheme;
     private HashMap<String, Object> objectHashMap = new HashMap<>();
 
@@ -63,7 +64,7 @@ public class CompatWebView extends WebView {
 //        }
         objectHashMap.put(name, object);
         initCompatJs();
-        addInterfaceJsString(object, name);
+        injectJsInterfaceForCompat(object, name);
 
     }
 
@@ -78,21 +79,26 @@ public class CompatWebView extends WebView {
     }
 
 
-    private void addInterfaceJsString(Object object, String name) {
-
+    private void injectJsInterfaceForCompat(Object object, String name) {
         Class clazz = object.getClass();
         Method[] methods = clazz.getDeclaredMethods();
         if (methods == null) {
             return;
         }
         StringBuilder sb = new StringBuilder("window.JInterface = {");
-
         for (Method method : methods) {
             Annotation[] annotations = method.getAnnotations();
+            boolean flag = false;
             if (annotations != null) {
                 for (Annotation annotation : annotations) {
-                    Log.i("WEB_", annotation.toString());
+                    if (JAVASCRIPT_ANNOTATION.equals(annotation.toString())) {
+                        flag = true;
+                        break;
+                    }
                 }
+            }
+            if (!flag) {
+                return;
             }
             sb.append(method.getName()).append("(");
             Class<?>[] parameterTypes = method.getParameterTypes();
