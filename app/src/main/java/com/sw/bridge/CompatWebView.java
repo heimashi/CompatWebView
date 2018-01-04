@@ -14,7 +14,9 @@ import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class CompatWebView extends WebView {
 
@@ -77,24 +79,49 @@ public class CompatWebView extends WebView {
 
 
     private void addInterfaceJsString(Object object, String name) {
-        StringBuilder sb = new StringBuilder();
+
         Class clazz = object.getClass();
         Method[] methods = clazz.getDeclaredMethods();
         if (methods == null) {
             return;
         }
+        StringBuilder sb = new StringBuilder("window.JInterface = {");
+
         for (Method method : methods) {
             Annotation[] annotations = method.getAnnotations();
-            Log.i("WEB_", annotations.toString());
+            if (annotations != null) {
+                for (Annotation annotation : annotations) {
+                    Log.i("WEB_", annotation.toString());
+                }
+            }
+            sb.append(method.getName()).append("(");
+            Class<?>[] parameterTypes = method.getParameterTypes();
+            int paramSize = parameterTypes.length;
+            List<String> paramList = new ArrayList<>();
+            for (int i = 0; i < paramSize; i++) {
+                String tmp = "param" + i;
+                sb.append(tmp);
+                paramList.add(tmp);
+                if (i < (paramSize - 1)) {
+                    sb.append(",");
+                }
+            }
+            sb.append("){compatMsgIFrame.src =\"").append(scheme).append("://").append(name).append("?fun=").append(method.getName());
+            if (paramList.size() == 0) {
+                sb.append("\"");
+            } else {
+                for (int i = 0; i < paramList.size(); i++) {
+                    sb.append("&").append(paramList.get(i)).append("=\"+").append(paramList.get(i));
+                    if (i < (paramSize - 1)) {
+                        sb.append("+\"");
+                    }
+                }
+            }
 
+            sb.append(";}");
         }
-
-        String ss = "window.JInterface = {" +
-                "        testJsCallJava(msg, code){" +
-                "           compatMsgIFrame.src = \"CompatScheme://JInterface?fun=testJsCallJava&msg=\"+msg+\"&code=\"+code;"+
-                "        }" +
-                "    }";
-        loadUrl("javascript:" + ss);
+        sb.append("}");
+        compatEvaluateJavascript(sb.toString());
     }
 
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
