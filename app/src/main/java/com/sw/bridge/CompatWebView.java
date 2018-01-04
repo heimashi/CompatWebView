@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 
 public class CompatWebView extends WebView {
 
@@ -82,7 +83,7 @@ public class CompatWebView extends WebView {
 
     private void injectJsInterfaceForCompat(Object object, String name) {
         Class clazz = object.getClass();
-        Method[] methods = clazz.getMethods();
+        Method[] methods = clazz.getDeclaredMethods();
         if (methods == null) {
             return;
         }
@@ -121,7 +122,7 @@ public class CompatWebView extends WebView {
         compatEvaluateJavascript(sb.toString());
     }
 
-    private static boolean checkMethodValid(Method method){
+    private static boolean checkMethodValid(Method method) {
         Annotation[] annotations = method.getAnnotations();
         if (annotations != null) {
             for (Annotation annotation : annotations) {
@@ -199,45 +200,84 @@ public class CompatWebView extends WebView {
         String methodName;
         LinkedHashMap<String, String> params = new LinkedHashMap<>();
 
-        private Class<?> getParamType(String obj) {
+        private List<Class<?>> getParamTypes(String obj) {
+            List<Class<?>> allTypes = new ArrayList<>();
+            allTypes.add(String.class);
             if (TextUtils.isDigitsOnly(obj)) {
                 if (obj.contains(".")) {
-                    return Float.class;
+                    allTypes.add(float.class);
+                    allTypes.add(double.class);
                 } else {
-                    return int.class;
+                    allTypes.add(int.class);
+                    allTypes.add(long.class);
+                    allTypes.add(short.class);
+                    allTypes.add(float.class);
+                    allTypes.add(double.class);
                 }
-            } else {
-                return String.class;
             }
+            return allTypes;
+        }
+
+        private Object convertByType(String obj, Class<?> type) {
+            if (type == String.class) {
+                return obj;
+            } else if (type == int.class) {
+                return Integer.parseInt(obj);
+            } else if (type == long.class) {
+                return Long.parseLong(obj);
+            } else if (type == short.class) {
+                return Short.parseShort(obj);
+            } else if (type == float.class) {
+                return Float.parseFloat(obj);
+            } else if (type == double.class) {
+                return Double.parseDouble(obj);
+            }
+            return obj;
         }
 
         boolean invoke(HashMap<String, Object> injectHashMap) {
+            Class<?>[] paramType = new Class[params.size()];
+            Object[] paramObj = new Object[params.size()];
+            return dfs(injectHashMap, 0, paramType, paramObj);
+        }
+
+        private boolean dfs(HashMap<String, Object> injectHashMap, int index, Class<?>[] paramType, Object[] paramObj) {
+            if (index == params.size()) {
+                return invoke(injectHashMap, paramType, paramObj);
+            }
+            String key = (String) params.keySet().toArray()[index];
+            List<Class<?>> keyTypes = getParamTypes(params.get(key));
+            for (int i = 0; i < keyTypes.size(); i++) {
+                paramType[index] = keyTypes.get(i);
+                paramObj[index] = convertByType(params.get(key), keyTypes.get(i));
+                dfs(injectHashMap, index + 1, paramType, paramObj);
+            }
+            return false;
+        }
+
+
+        private boolean invoke(HashMap<String, Object> injectHashMap, Class<?>[] paramType, Object[] paramObj) {
+            Log.i("WEB_", "+++++:" + paramType[0]+" "+paramType[1] + "\n" + paramObj[0]+" "+paramObj[1]);
             Object injectInstance = injectHashMap.get(object);
             if (injectInstance == null) {
                 return false;
             }
             Class<?> clazz = injectInstance.getClass();
-            int size = params.size();
-
             try {
-                clazz.getMethods();
-
-
-
-                Method method = clazz.getMethod(methodName, String.class, String.class);
-                if (!checkMethodValid(method)) {
-                    return false;
+                Method method = clazz.getDeclaredMethod(methodName, paramType);
+                if (checkMethodValid(method)) {
+                    method.setAccessible(true);
+                    method.invoke(injectInstance, paramObj);
+                    return true;
                 }
-                method.setAccessible(true);
-                method.invoke(injectInstance, "ssfsf", 10);
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
                 e.printStackTrace();
+            } catch (NoSuchMethodException e) {
+                //e.printStackTrace();
             }
-            return true;
+            return false;
         }
 
     }

@@ -58,7 +58,7 @@ public class WebView2Activity extends Activity {
         webView.compatEvaluateJavascript("javaCallJs()");
     }
 
-    private class JInterface {
+    public class JInterface {
         @JavascriptInterface
         @SuppressWarnings("unused")
         public void testJsCallJava(String msg, int i) {
