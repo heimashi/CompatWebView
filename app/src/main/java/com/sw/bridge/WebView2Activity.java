@@ -40,15 +40,16 @@ public class WebView2Activity extends Activity {
                 return super.onJsAlert(view, url, message, result);
             }
         });
-//        webView.setWebViewClient(new WebViewClient() {
-//
-//            @Override
-//            public void onPageFinished(WebView view, String url) {
-//                super.onPageFinished(view, url);
-//                testJavaCallJs();
-//            }
-//        });
-        webView.compatAddJavascriptInterface(new JInterface(), "JInterface");
+        webView.setWebViewClient(new CompatWebViewClient() {
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                //testJavaCallJs();
+                webView.compatAddJavascriptInterface(new JInterface(), "JInterface");
+            }
+        });
+
         webView.loadUrl("file:///android_asset/web_test.html");
 
     }

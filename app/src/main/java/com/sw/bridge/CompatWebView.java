@@ -60,14 +60,23 @@ public class CompatWebView extends WebView {
 //
 //        }
         objectHashMap.put(name, object);
-        buildJsString(object, name);
+        initCompatJs();
+        addInterfaceJsString(object, name);
 
     }
 
-    private String js = "";
+    private void initCompatJs() {
+        if (!isInjectCompatJsFlag) {
+            isInjectCompatJsFlag = true;
+            String initIFrame = "compatMsgIFrame = document.createElement('iframe');\n" +
+                    "            compatMsgIFrame.style.display = 'none';\n" +
+                    "            document.documentElement.appendChild(compatMsgIFrame);";
+            compatEvaluateJavascript(initIFrame);
+        }
+    }
 
 
-    private void buildJsString(Object object, String name) {
+    private void addInterfaceJsString(Object object, String name) {
         StringBuilder sb = new StringBuilder();
         Class clazz = object.getClass();
         Method[] methods = clazz.getDeclaredMethods();
@@ -79,6 +88,13 @@ public class CompatWebView extends WebView {
             Log.i("WEB_", annotations.toString());
 
         }
+
+        String ss = "window.JInterface = {" +
+                "        testJsCallJava(msg, code){" +
+                "           compatMsgIFrame.src = \"CompatScheme://JInterface?fun=testJsCallJava&msg=\"+msg+\"&code=\"+code;"+
+                "        }" +
+                "    }";
+        loadUrl("javascript:" + ss);
     }
 
     public boolean shouldOverrideUrlLoading(WebView view, String url) {

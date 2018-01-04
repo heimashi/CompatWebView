@@ -2,57 +2,25 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <title>还在用花呗淘宝你就out了</title>
-    <meta name="viewport"
-          content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no"/>
-    <link rel="stylesheet" type="text/css"
-          href="http://m.rong360.com/rui/m_guide/css/m_guide_app.css">
-
-    <script type="text/javascript"
-            src="http://m.rong360.com/rui/m_rongui/libs/zepto/zepto.js?t=1"></script>
-    <script type="text/javascript">
-        !function(){function j(){var c=e.getBoundingClientRect().width;c/b>540&&(c=540*b),a=14*(c/320),e.style.fontSize=a+"px"}var a,b,c,g,h,i,d=window.document,e=d.documentElement,f=d.querySelector('meta[name="viewport"]');f&&(console.warn("将根据已有的meta标签来设置缩放比例"),g=f.getAttribute("content").match(/initial\-scale=(["']?)([\d\.]+)\1?/),g&&(h=parseFloat(g[2]),b=parseInt(1/h))),b||h||(window.navigator.appVersion.match(/android/gi),i=window.navigator.appVersion.match(/iphone/gi),b=window.devicePixelRatio,b=i?b>=3?3:b>=2?2:1:1,h=1/b),window.addEventListener("resize",function(){clearTimeout(c),c=setTimeout(j,300)},!1),j()}();
-    </script>
-
+    <title>Js与Android交互案例</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no"/>
 </head>
 <body>
 <div class="MiniWrap">
     <div class="article-detail">
         <div class="body">
-            <div class="title">还在用花呗淘宝你就out了</div>
+            <div class="title">Js与Android交互案例</div>
             <p><input type="button" value="testJsCallJava" onclick="testJsCallJava();"/></p>
-            <p class="info" doc="12 tail">作者：<span doc="blue">Clever</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2015-07-03
-            </p>
-            <p>
-                这里有一张卡，网购可以累计10倍积分，是兑换免费机票的一种捷径。如果你是马云背后的女人，你值得拥有。如果你想走上人生巅峰，赢取白富美空姐、嫁给高富帅空乘，你应该拥有。</p>
         </div>
     </div>
 
     <script type="text/javascript">
 			function testJsCallJava(){
-				JInterface.testJsCallJava("jsCallJava success", 20)
+			    JInterface.testJsCallJava("jsCallJava success", 20)
 			}
-
 			function javaCallJs(){
 			    alert("javaCallJs success");
 			}
-
-			window.JInterface = {
-			    testJsCallJava(msg, code){
-			        //alert("ji success:"+msg);
-			        //document.location = "CompatScheme://JInterface?fun=testJsCallJava&msg="+msg+"&code="+code;
-			        messagingIFrame.src = "CompatScheme://JInterface?fun=testJsCallJava&msg="+msg+"&code="+code;
-			    }
-			}
-
-			var messagingIFrame;
-			function _createQueueReadyIFrame(doc) {
-                messagingIFrame = doc.createElement('iframe');
-                messagingIFrame.style.display = 'none';
-                doc.documentElement.appendChild(messagingIFrame);
-            }
-            _createQueueReadyIFrame(document)
-
     </script>
 </div>
 </body>
