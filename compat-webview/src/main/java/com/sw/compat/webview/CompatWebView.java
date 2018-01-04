@@ -48,6 +48,10 @@ public class CompatWebView extends WebView {
         this.scheme = scheme.toLowerCase();
     }
 
+    public String getScheme() {
+        return scheme;
+    }
+
     public void compatEvaluateJavascript(String javascript) {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             loadUrl("javascript:" + javascript);
