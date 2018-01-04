@@ -106,7 +106,7 @@ public class CompatWebView extends WebView {
                     sb.append(",");
                 }
             }
-            sb.append("){compatMsgIFrame.src =\"").append(scheme).append("://").append(name).append("?fun=").append(method.getName());
+            sb.append("){schemeEncode = encodeURIComponent(\"").append(name).append("?fun=").append(method.getName());
             if (paramList.size() == 0) {
                 sb.append("\"");
             } else {
@@ -118,7 +118,7 @@ public class CompatWebView extends WebView {
                 }
             }
 
-            sb.append(";}");
+            sb.append("); compatMsgIFrame.src =\"").append(scheme).append("://\"").append("+schemeEncode;}");
         }
         sb.append("}");
         compatEvaluateJavascript(sb.toString());
@@ -126,14 +126,15 @@ public class CompatWebView extends WebView {
 
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
         try {
-            url = URLDecoder.decode(url, "UTF-8");
+            String urlDecode = URLDecoder.decode(url, "UTF-8");
+            if (urlDecode.startsWith(scheme)) {
+                Log.i("WEB_", url + "\n" + urlDecode);
+                return true;
+            }
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        if (url.startsWith(scheme)) {
-            Log.i("WEB_", url);
-            return true;
-        }
+
         return false;
     }
 }

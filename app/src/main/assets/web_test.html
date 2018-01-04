@@ -16,11 +16,18 @@
 
     <script type="text/javascript">
 			function testJsCallJava(){
-			    JInterface.testJsCallJava("jsCallJava success", 20)
+			    JInterface.testJsCallJava("jsCallJava success测试中文", 20)
 			}
 			function javaCallJs(){
 			    alert("javaCallJs success");
 			}
+
+			<!--window.JInterface = {-->
+			    <!--testJsCallJava(param0,param1){-->
+			        <!--schemeEncode =encodeURIComponent("JInterface?fun=testJsCallJava&param0="+param0+"&param1="+param1);-->
+			        <!--compatMsgIFrame.src = "compatscheme://"+schemeEncode;-->
+			    <!--}-->
+			<!--}-->
     </script>
 </div>
 </body>
