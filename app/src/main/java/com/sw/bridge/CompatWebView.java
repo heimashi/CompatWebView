@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
 
 public class CompatWebView extends WebView {
 
@@ -59,15 +58,11 @@ public class CompatWebView extends WebView {
 
     @SuppressLint({"JavascriptInterface", "AddJavascriptInterface"})
     public void compatAddJavascriptInterface(Object object, String name) {
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-//            super.addJavascriptInterface(object, name);
-//        } else {
-//
-//        }
-        injectHashMap.put(name, object);
-        initCompatJs();
-        injectJsInterfaceForCompat(object, name);
-
+        if (false && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            addJavascriptInterface(object, name);
+        } else {
+            injectHashMap.put(name, object);
+        }
     }
 
     private void initCompatJs() {
@@ -134,7 +129,7 @@ public class CompatWebView extends WebView {
         return false;
     }
 
-    public boolean shouldOverrideUrlLoading(WebView view, String url) {
+    public boolean shouldOverrideUrlLoading(String url) {
         try {
             String urlDecode = URLDecoder.decode(url, "UTF-8");
             if (urlDecode.startsWith(scheme)) {
@@ -149,6 +144,15 @@ public class CompatWebView extends WebView {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public void onPageFinished(String url) {
+        Log.i("tag", "+++++"+url);
+        initCompatJs();
+        for (String name : injectHashMap.keySet()) {
+            Object object = injectHashMap.get(name);
+            injectJsInterfaceForCompat(object, name);
+        }
     }
 
     private JavaMethod decodeMethodFromUrl(String url) {
@@ -257,7 +261,7 @@ public class CompatWebView extends WebView {
 
 
         private boolean invoke(HashMap<String, Object> injectHashMap, Class<?>[] paramType, Object[] paramObj) {
-            Log.i("WEB_", "+++++:" + paramType[0]+" "+paramType[1] + "\n" + paramObj[0]+" "+paramObj[1]);
+            Log.i("WEB_", "+++++:" + paramType[0] + " " + paramType[1] + "\n" + paramObj[0] + " " + paramObj[1]);
             Object injectInstance = injectHashMap.get(object);
             if (injectInstance == null) {
                 return false;

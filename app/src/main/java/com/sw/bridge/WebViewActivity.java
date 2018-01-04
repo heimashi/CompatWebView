@@ -91,11 +91,11 @@ public class WebViewActivity extends Activity {
         }
     }
 
-    private class JInterface {
+    private static class JInterface {
         @JavascriptInterface
         @SuppressWarnings("unused")
         public void testJsCallJava(String msg, int i) {
-            Toast.makeText(WebViewActivity.this, msg + ":" + (i + 20), Toast.LENGTH_SHORT).show();
+            Toast.makeText(MyApp.application, msg + ":" + (i + 20), Toast.LENGTH_SHORT).show();
         }
     }
 

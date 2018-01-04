@@ -46,10 +46,10 @@ public class WebView2Activity extends Activity {
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 //testJavaCallJs();
-                webView.compatAddJavascriptInterface(new JInterface(), "JInterface");
+
             }
         });
-
+        webView.compatAddJavascriptInterface(new JInterface(), "JInterface");
         webView.loadUrl("file:///android_asset/web_test.html");
 
     }
@@ -58,11 +58,11 @@ public class WebView2Activity extends Activity {
         webView.compatEvaluateJavascript("javaCallJs()");
     }
 
-    public class JInterface {
+    private static class JInterface {
         @JavascriptInterface
         @SuppressWarnings("unused")
         public void testJsCallJava(String msg, int i) {
-            Toast.makeText(WebView2Activity.this, msg + ":" + (i + 20), Toast.LENGTH_SHORT).show();
+            Toast.makeText(MyApp.application, msg + ":" + (i + 20), Toast.LENGTH_SHORT).show();
         }
     }
 
