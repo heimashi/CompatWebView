@@ -30,12 +30,28 @@
 
     <script type="text/javascript">
 			function testJsCallJava(){
-				JInterface.testJsCallJava("jsCallJava success")
+				JInterface.testJsCallJava("jsCallJava success", 20)
 			}
 
 			function javaCallJs(){
 			    alert("javaCallJs success");
 			}
+
+			window.JInterface = {
+			    testJsCallJava(msg, code){
+			        //alert("ji success:"+msg);
+			        //document.location = "JTScheme://JInterface?fun=testJsCallJava&msg="+msg+"&code="+code;
+			        messagingIFrame.src = "JTScheme://JInterface?fun=testJsCallJava&msg="+msg+"&code="+code;
+			    }
+			}
+
+			var messagingIFrame;
+			function _createQueueReadyIFrame(doc) {
+                messagingIFrame = doc.createElement('iframe');
+                messagingIFrame.style.display = 'none';
+                doc.documentElement.appendChild(messagingIFrame);
+            }
+            _createQueueReadyIFrame(document)
 
     </script>
 </div>

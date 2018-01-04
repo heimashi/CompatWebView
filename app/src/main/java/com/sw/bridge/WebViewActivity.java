@@ -3,19 +3,25 @@ package com.sw.bridge;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.os.Build;
 import android.os.Bundle;
 import android.webkit.JavascriptInterface;
 import android.webkit.JsPromptResult;
 import android.webkit.JsResult;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+
 public class WebViewActivity extends Activity {
 
     private WebView webView;
+    private static final String SCHEME = "jtscheme";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +50,15 @@ public class WebViewActivity extends Activity {
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                try {
+                    url = URLDecoder.decode(url, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                if(url.startsWith(SCHEME)){
+                    Toast.makeText(WebViewActivity.this, url, Toast.LENGTH_SHORT).show();
+                    return true;
+                }
                 return super.shouldOverrideUrlLoading(view, url);
             }
 
@@ -58,20 +73,29 @@ public class WebViewActivity extends Activity {
                 testJavaCallJs();
             }
         });
-        webView.addJavascriptInterface(new JInterface(), "JInterface");
+        //webView.addJavascriptInterface(new JInterface(), "JInterface");
         webView.loadUrl("file:///android_asset/web_test.html");
 
     }
 
     public void testJavaCallJs() {
-        webView.loadUrl("javascript:javaCallJs()");
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            webView.loadUrl("javascript:javaCallJs()");
+        } else {
+            webView.evaluateJavascript("javascript:javaCallJs()", new ValueCallback<String>() {
+                @Override
+                public void onReceiveValue(String value) {
+
+                }
+            });
+        }
     }
 
     private class JInterface {
         @JavascriptInterface
         @SuppressWarnings("unused")
-        public void testJsCallJava(String msg) {
-            Toast.makeText(WebViewActivity.this, msg, Toast.LENGTH_SHORT).show();
+        public void testJsCallJava(String msg, int i) {
+            Toast.makeText(WebViewActivity.this, msg + ":" + (i + 20), Toast.LENGTH_SHORT).show();
         }
     }
 
