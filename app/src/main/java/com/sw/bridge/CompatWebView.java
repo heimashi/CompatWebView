@@ -147,7 +147,7 @@ public class CompatWebView extends WebView {
     }
 
     public void onPageFinished(String url) {
-        Log.i("tag", "+++++"+url);
+        Log.i("tag", "+++++" + url);
         initCompatJs();
         for (String name : injectHashMap.keySet()) {
             Object object = injectHashMap.get(name);
@@ -203,6 +203,7 @@ public class CompatWebView extends WebView {
         String object;
         String methodName;
         LinkedHashMap<String, String> params = new LinkedHashMap<>();
+        private boolean isFindMethod = false;
 
         private List<Class<?>> getParamTypes(String obj) {
             List<Class<?>> allTypes = new ArrayList<>();
@@ -242,12 +243,19 @@ public class CompatWebView extends WebView {
         boolean invoke(HashMap<String, Object> injectHashMap) {
             Class<?>[] paramType = new Class[params.size()];
             Object[] paramObj = new Object[params.size()];
-            return dfs(injectHashMap, 0, paramType, paramObj);
+            dfs(injectHashMap, 0, paramType, paramObj);
+            Log.i("WEB_", "+++++f:" + isFindMethod);
+            return isFindMethod;
         }
 
-        private boolean dfs(HashMap<String, Object> injectHashMap, int index, Class<?>[] paramType, Object[] paramObj) {
+
+        private void dfs(HashMap<String, Object> injectHashMap, int index, Class<?>[] paramType, Object[] paramObj) {
+            if (isFindMethod) {
+                return;
+            }
             if (index == params.size()) {
-                return invoke(injectHashMap, paramType, paramObj);
+                invoke(injectHashMap, paramType, paramObj);
+                return;
             }
             String key = (String) params.keySet().toArray()[index];
             List<Class<?>> keyTypes = getParamTypes(params.get(key));
@@ -256,15 +264,14 @@ public class CompatWebView extends WebView {
                 paramObj[index] = convertByType(params.get(key), keyTypes.get(i));
                 dfs(injectHashMap, index + 1, paramType, paramObj);
             }
-            return false;
         }
 
 
-        private boolean invoke(HashMap<String, Object> injectHashMap, Class<?>[] paramType, Object[] paramObj) {
+        private void invoke(HashMap<String, Object> injectHashMap, Class<?>[] paramType, Object[] paramObj) {
             Log.i("WEB_", "+++++:" + paramType[0] + " " + paramType[1] + "\n" + paramObj[0] + " " + paramObj[1]);
             Object injectInstance = injectHashMap.get(object);
             if (injectInstance == null) {
-                return false;
+                return;
             }
             Class<?> clazz = injectInstance.getClass();
             try {
@@ -272,7 +279,8 @@ public class CompatWebView extends WebView {
                 if (checkMethodValid(method)) {
                     method.setAccessible(true);
                     method.invoke(injectInstance, paramObj);
-                    return true;
+                    isFindMethod = true;
+                    return;
                 }
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
@@ -281,7 +289,6 @@ public class CompatWebView extends WebView {
             } catch (NoSuchMethodException e) {
                 //e.printStackTrace();
             }
-            return false;
         }
 
     }
