@@ -1,4 +1,4 @@
-package com.sw.bridge;
+package com.sw.compat.webview;
 
 
 import android.os.Build;
@@ -10,11 +10,10 @@ public class CompatWebViewClient extends WebViewClient {
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            //todo
-        }
-        if (view instanceof CompatWebView) {
-            if (((CompatWebView) view).shouldOverrideUrlLoading(url)) {
-                return true;
+            if (view instanceof CompatWebView) {
+                if (((CompatWebView) view).shouldOverrideUrlLoading(url)) {
+                    return true;
+                }
             }
         }
         return super.shouldOverrideUrlLoading(view, url);
@@ -24,10 +23,10 @@ public class CompatWebViewClient extends WebViewClient {
     public void onPageFinished(WebView view, String url) {
         super.onPageFinished(view, url);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            //todo
+            if (view instanceof CompatWebView) {
+                ((CompatWebView) view).onPageFinished(url);
+            }
         }
-        if (view instanceof CompatWebView) {
-            ((CompatWebView) view).onPageFinished(url);
-        }
+
     }
 }

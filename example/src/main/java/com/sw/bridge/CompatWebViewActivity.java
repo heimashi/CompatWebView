@@ -9,18 +9,20 @@ import android.webkit.JsPromptResult;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import com.sw.compat.webview.CompatWebView;
+import com.sw.compat.webview.CompatWebViewClient;
 
-public class WebView2Activity extends Activity {
+
+public class CompatWebViewActivity extends Activity {
 
     private CompatWebView webView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_webview2_layout);
+        setContentView(R.layout.activity_webview_compat_layout);
         initView();
     }
 
@@ -45,7 +47,7 @@ public class WebView2Activity extends Activity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                //testJavaCallJs();
+                testJavaCallJs();
 
             }
         });

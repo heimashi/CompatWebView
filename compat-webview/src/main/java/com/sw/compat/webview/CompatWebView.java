@@ -1,4 +1,4 @@
-package com.sw.bridge;
+package com.sw.compat.webview;
 
 
 import android.annotation.SuppressLint;
@@ -58,7 +58,7 @@ public class CompatWebView extends WebView {
 
     @SuppressLint({"JavascriptInterface", "AddJavascriptInterface"})
     public void compatAddJavascriptInterface(Object object, String name) {
-        if (false && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             addJavascriptInterface(object, name);
         } else {
             injectHashMap.put(name, object);
@@ -133,7 +133,7 @@ public class CompatWebView extends WebView {
         try {
             String urlDecode = URLDecoder.decode(url, "UTF-8");
             if (urlDecode.startsWith(scheme)) {
-                Log.i("WEB_", urlDecode);
+                log(urlDecode);
                 JavaMethod javaMethod = decodeMethodFromUrl(urlDecode);
                 if (javaMethod == null) {
                     return false;
@@ -186,7 +186,7 @@ public class CompatWebView extends WebView {
                 javaMethod.params.put(params[0], params[1]);
             }
         }
-        Log.i("WEB_", "m:" + javaMethod.toString());
+        log("m:" + javaMethod.toString());
         return javaMethod;
     }
 
@@ -244,7 +244,7 @@ public class CompatWebView extends WebView {
             Class<?>[] paramType = new Class[params.size()];
             Object[] paramObj = new Object[params.size()];
             dfs(injectHashMap, 0, paramType, paramObj);
-            Log.i("WEB_", "+++++f:" + isFindMethod);
+            log("+++++f:" + isFindMethod);
             return isFindMethod;
         }
 
@@ -254,7 +254,7 @@ public class CompatWebView extends WebView {
                 return;
             }
             if (index == params.size()) {
-                invoke(injectHashMap, paramType, paramObj);
+                tryToInvoke(injectHashMap, paramType, paramObj);
                 return;
             }
             String key = (String) params.keySet().toArray()[index];
@@ -267,8 +267,8 @@ public class CompatWebView extends WebView {
         }
 
 
-        private void invoke(HashMap<String, Object> injectHashMap, Class<?>[] paramType, Object[] paramObj) {
-            Log.i("WEB_", "+++++:" + paramType[0] + " " + paramType[1] + "\n" + paramObj[0] + " " + paramObj[1]);
+        private void tryToInvoke(HashMap<String, Object> injectHashMap, Class<?>[] paramType, Object[] paramObj) {
+            log("+++++:" + paramType[0] + " " + paramType[1] + "\n" + paramObj[0] + " " + paramObj[1]);
             Object injectInstance = injectHashMap.get(object);
             if (injectInstance == null) {
                 return;
@@ -280,16 +280,20 @@ public class CompatWebView extends WebView {
                     method.setAccessible(true);
                     method.invoke(injectInstance, paramObj);
                     isFindMethod = true;
-                    return;
                 }
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
                 e.printStackTrace();
             } catch (NoSuchMethodException e) {
-                //e.printStackTrace();
+                //do nothing;
             }
         }
 
+    }
+
+
+    private static void log(String msg) {
+        Log.i("WEB_", msg);
     }
 }
