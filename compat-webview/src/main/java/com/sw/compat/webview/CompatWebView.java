@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class CompatWebView extends WebView {
 
@@ -86,12 +87,13 @@ public class CompatWebView extends WebView {
         if (methods == null) {
             return;
         }
-        StringBuilder sb = new StringBuilder("window.JInterface = {");
+        StringBuilder sb = new StringBuilder("window.JInterface = {};");
         for (Method method : methods) {
             if (!checkMethodValid(method)) {
                 return;
             }
-            sb.append(method.getName()).append("(");
+            sb.append("window.JInterface.");
+            sb.append(method.getName()).append(" = function(");
             Class<?>[] parameterTypes = method.getParameterTypes();
             int paramSize = parameterTypes.length;
             List<String> paramList = new ArrayList<>();
@@ -115,9 +117,8 @@ public class CompatWebView extends WebView {
                 }
             }
 
-            sb.append("); compatMsgIFrame.src =\"").append(scheme).append("://\"").append("+schemeEncode;}");
+            sb.append("); compatMsgIFrame.src =\"").append(scheme).append("://\"").append("+schemeEncode;};");
         }
-        sb.append("}");
         compatEvaluateJavascript(sb.toString());
     }
 
@@ -195,14 +196,6 @@ public class CompatWebView extends WebView {
     }
 
     private static class JavaMethod {
-        @Override
-        public String toString() {
-            return "JavaMethod{" +
-                    "object='" + object + '\'' +
-                    ", methodName='" + methodName + '\'' +
-                    ", params=" + params +
-                    '}';
-        }
 
         String object;
         String methodName;
@@ -213,18 +206,24 @@ public class CompatWebView extends WebView {
             List<Class<?>> allTypes = new ArrayList<>();
             allTypes.add(String.class);
             if (TextUtils.isDigitsOnly(obj)) {
-                if (obj.contains(".")) {
-                    allTypes.add(float.class);
-                    allTypes.add(double.class);
-                } else {
-                    allTypes.add(int.class);
-                    allTypes.add(long.class);
-                    allTypes.add(short.class);
-                    allTypes.add(float.class);
-                    allTypes.add(double.class);
-                }
+                allTypes.add(int.class);
+                allTypes.add(long.class);
+                allTypes.add(short.class);
+                allTypes.add(float.class);
+                allTypes.add(double.class);
+            } else if (isFloatOrDouble(obj)) {
+                allTypes.add(float.class);
+                allTypes.add(double.class);
             }
             return allTypes;
+        }
+
+        private boolean isFloatOrDouble(String str) {
+            if (null == str || "".equals(str)) {
+                return false;
+            }
+            Pattern pattern = Pattern.compile("^[-\\+]?[.\\d]*$");
+            return pattern.matcher(str).matches();
         }
 
         private Object convertByType(String obj, Class<?> type) {
@@ -263,6 +262,7 @@ public class CompatWebView extends WebView {
             }
             String key = (String) params.keySet().toArray()[index];
             List<Class<?>> keyTypes = getParamTypes(params.get(key));
+            log("key:" + key + ":: " + keyTypes);
             for (int i = 0; i < keyTypes.size(); i++) {
                 paramType[index] = keyTypes.get(i);
                 paramObj[index] = convertByType(params.get(key), keyTypes.get(i));
@@ -272,7 +272,13 @@ public class CompatWebView extends WebView {
 
 
         private void tryToInvoke(HashMap<String, Object> injectHashMap, Class<?>[] paramType, Object[] paramObj) {
-            log("+++++:" + paramType[0] + " " + paramType[1] + "\n" + paramObj[0] + " " + paramObj[1]);
+            if (paramType != null) {
+                StringBuilder sb = new StringBuilder("PARAMS:");
+                for (int i = 0; i < paramType.length; i++) {
+                    sb.append(paramType[i]).append(":").append(paramObj[i]).append(",");
+                }
+                log(sb.toString());
+            }
             Object injectInstance = injectHashMap.get(object);
             if (injectInstance == null) {
                 return;
@@ -292,6 +298,15 @@ public class CompatWebView extends WebView {
             } catch (NoSuchMethodException e) {
                 //do nothing;
             }
+        }
+
+        @Override
+        public String toString() {
+            return "JavaMethod{" +
+                    "object='" + object + '\'' +
+                    ", methodName='" + methodName + '\'' +
+                    ", params=" + params +
+                    '}';
         }
 
     }

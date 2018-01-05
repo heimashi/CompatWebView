@@ -66,6 +66,12 @@ public class CompatWebViewActivity extends Activity {
         public void testJsCallJava(String msg, int i) {
             Toast.makeText(MyApp.application, msg + ":" + (i + 20), Toast.LENGTH_SHORT).show();
         }
+
+        @JavascriptInterface
+        @SuppressWarnings("unused")
+        public void testJsCallJava2(String msg, double i, float j) {
+            Toast.makeText(MyApp.application, msg + "::" + (i + j), Toast.LENGTH_SHORT).show();
+        }
     }
 
 }
