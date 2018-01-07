@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>Js与Android交互案例</title>
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no"/>
+</head>
+<body>
+<div class="MiniWrap">
+    <div class="article-detail">
+        <div class="body">
+            <div class="title">Js与Android交互案例</div>
+            <p><input type="button" value="JsCallJavaByConsole" onclick="testJsCallJavaByConsole();"/></p>
+            <p><input type="button" value="JsCallJavaByAlert" onclick="testJsCallJavaByAlert();"/></p>
+            <p><input type="button" value="JsCallJavaByConfirm" onclick="testJsCallJavaByConfirm();"/></p>
+            <p><input type="button" value="JsCallJavaByPrompt" onclick="testJsCallJavaByPrompt();"/></p>
+            <p><input type="button" value="JsCallJavaByJavascriptInterface" onclick="testJsCallJavaByJavascriptInterface();"/></p>
+            <p><input type="button" value="JsCallJavaByShouldOverrideUrlLoading" onclick="testJsCallJavaByShouldOverrideUrlLoading();"/></p>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+
+			function javaCallJs(){
+			    alert("javaCallJs success");
+			}
+
+            <!--WebChromeClient-->
+			function testJsCallJavaByConsole(){
+			    console.log("say hello by console");
+			}
+
+            function testJsCallJavaByAlert(){
+			    alert("say hello by alert");
+			}
+
+			function testJsCallJavaByConfirm(){
+			    confirm("say hello by confirm");
+			}
+
+			function testJsCallJavaByPrompt(){
+			    window.prompt("jtscheme://hello?a=1&b=hi");
+			}
+
+            <!--WebViewClient-->
+			function testJsCallJavaByShouldOverrideUrlLoading(){
+			    document.location = "jtscheme://hello"
+			}
+
+			function testJsCallJavaByJavascriptInterface(){
+			    JInterface.testJsCallJava("hello", 666)
+			}
+
+
+    </script>
+</div>
+</body>
+</html>

@@ -3,8 +3,11 @@ package com.sw.bridge;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
+import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
 import android.webkit.JsPromptResult;
 import android.webkit.JsResult;
@@ -15,10 +18,9 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
-import com.sw.compat.webview.Util;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.Set;
 
 public class WebViewActivity extends Activity {
 
@@ -40,12 +42,34 @@ public class WebViewActivity extends Activity {
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public boolean onJsPrompt(WebView view, String url, String message, String defaultValue, JsPromptResult result) {
+                Uri uri = Uri.parse(message);
+                if (SCHEME.equals(uri.getScheme())) {
+                    String authority = uri.getAuthority();
+                    Set<String> params = uri.getQueryParameterNames();
+                    for (String s : params) {
+                        Log.i("WEB_", s + ":" + uri.getQueryParameter(s));
+                    }
+                    Toast.makeText(MyApp.application, "Prompt::" + authority, Toast.LENGTH_SHORT).show();
+                }
                 return super.onJsPrompt(view, url, message, defaultValue, result);
             }
 
             @Override
             public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
+                Toast.makeText(MyApp.application, "Alert::" + message, Toast.LENGTH_SHORT).show();
                 return super.onJsAlert(view, url, message, result);
+            }
+
+            @Override
+            public boolean onJsConfirm(WebView view, String url, String message, JsResult result) {
+                Toast.makeText(MyApp.application, "Confirm::" + message, Toast.LENGTH_SHORT).show();
+                return super.onJsConfirm(view, url, message, result);
+            }
+
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+                Toast.makeText(MyApp.application, "Console::" + consoleMessage.message(), Toast.LENGTH_SHORT).show();
+                return super.onConsoleMessage(consoleMessage);
             }
         });
         webView.setWebViewClient(new WebViewClient() {
@@ -57,16 +81,11 @@ public class WebViewActivity extends Activity {
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
-                if(url.startsWith(SCHEME)){
+                if (url.startsWith(SCHEME)) {
                     Toast.makeText(WebViewActivity.this, url, Toast.LENGTH_SHORT).show();
                     return true;
                 }
                 return super.shouldOverrideUrlLoading(view, url);
-            }
-
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                return super.shouldOverrideUrlLoading(view, request);
             }
 
             @Override
@@ -76,7 +95,7 @@ public class WebViewActivity extends Activity {
             }
         });
         webView.addJavascriptInterface(new JInterface(), "JInterface");
-        webView.loadUrl("file:///android_asset/web_inject.html");
+        webView.loadUrl("file:///android_asset/web_js_android.html");
         test();
 
     }
@@ -102,7 +121,7 @@ public class WebViewActivity extends Activity {
         }
     }
 
-    public void test(){
+    public void test() {
         Util.test();
     }
 

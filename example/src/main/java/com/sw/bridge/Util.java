@@ -1,4 +1,4 @@
-package com.sw.compat.webview;
+package com.sw.bridge;
 
 import android.util.Log;
 
