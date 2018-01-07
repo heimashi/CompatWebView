@@ -73,8 +73,8 @@ public class WebViewActivity extends Activity {
                 testJavaCallJs();
             }
         });
-        //webView.addJavascriptInterface(new JInterface(), "JInterface");
-        webView.loadUrl("file:///android_asset/web_test.html");
+        webView.addJavascriptInterface(new JInterface(), "JInterface");
+        webView.loadUrl("file:///android_asset/web_inject.html");
 
     }
 
@@ -98,5 +98,7 @@ public class WebViewActivity extends Activity {
             Toast.makeText(MyApp.application, msg + ":" + (i + 20), Toast.LENGTH_SHORT).show();
         }
     }
+
+
 
 }
