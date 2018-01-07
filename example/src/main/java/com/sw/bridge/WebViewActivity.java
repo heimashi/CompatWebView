@@ -15,6 +15,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import com.sw.compat.webview.Util;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
@@ -75,6 +77,7 @@ public class WebViewActivity extends Activity {
         });
         webView.addJavascriptInterface(new JInterface(), "JInterface");
         webView.loadUrl("file:///android_asset/web_inject.html");
+        test();
 
     }
 
@@ -91,7 +94,7 @@ public class WebViewActivity extends Activity {
         }
     }
 
-    private static class JInterface {
+    public static class JInterface {
         @JavascriptInterface
         @SuppressWarnings("unused")
         public void testJsCallJava(String msg, int i) {
@@ -99,6 +102,9 @@ public class WebViewActivity extends Activity {
         }
     }
 
+    public void test(){
+        Util.test();
+    }
 
 
 }

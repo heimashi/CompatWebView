@@ -214,6 +214,8 @@ public class CompatWebView extends WebView {
             } else if (isFloatOrDouble(obj)) {
                 allTypes.add(float.class);
                 allTypes.add(double.class);
+            } else if (obj.length() == 1) {
+                allTypes.add(char.class);
             }
             return allTypes;
         }
@@ -239,6 +241,8 @@ public class CompatWebView extends WebView {
                 return Float.parseFloat(obj);
             } else if (type == double.class) {
                 return Double.parseDouble(obj);
+            } else if (type == char.class) {
+                return obj.charAt(0);
             }
             return obj;
         }
