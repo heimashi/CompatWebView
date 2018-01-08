@@ -58,7 +58,7 @@ public class CompatWebView extends WebView {
     }
 
     public void compatEvaluateJavascript(String javascript) {
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+        if (Build.VERSION.SDK_INT <= 18) {
             loadUrl("javascript:" + javascript);
         } else {
             evaluateJavascript("javascript:" + javascript, null);
@@ -67,7 +67,7 @@ public class CompatWebView extends WebView {
 
     @SuppressLint({"JavascriptInterface", "AddJavascriptInterface"})
     public void compatAddJavascriptInterface(Object object, String name) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+        if (Build.VERSION.SDK_INT >= 17) {
             addJavascriptInterface(object, name);
         } else {
             injectHashMap.put(name, object);
