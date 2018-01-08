@@ -3,6 +3,7 @@ package com.sw.compat.webview;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 
@@ -126,7 +128,7 @@ public class CompatWebView extends WebView {
         try {
             String urlDecode = URLDecoder.decode(url, "UTF-8");
             if (urlDecode.startsWith(scheme)) {
-                JavaMethod javaMethod = decodeMethodFromUrl(urlDecode);
+                JavaMethod javaMethod = decodeMethodFromUri(urlDecode);
                 if (javaMethod == null) {
                     return false;
                 }
@@ -145,36 +147,25 @@ public class CompatWebView extends WebView {
         }
     }
 
-    private JavaMethod decodeMethodFromUrl(String url) {
-        if (!url.contains("?")) {
+    private JavaMethod decodeMethodFromUri(String url) {
+        if (url == null) {
             return null;
         }
-
+        Uri decodeUri = Uri.parse(url);
+        String dScheme = decodeUri.getScheme();
+        String authority = decodeUri.getAuthority();
+        Set<String> params = decodeUri.getQueryParameterNames();
+        if (!scheme.equals(dScheme) || authority == null || !params.contains("fun")) {
+            return null;
+        }
         JavaMethod javaMethod = new JavaMethod();
-        int start = url.indexOf("://");
-        int end = url.indexOf("?");
-        if (start <= 0 || end < start) {
-            return null;
-        }
-        javaMethod.object = url.substring(start + 3, end);
-        String tmp = url.substring(end + 1, url.length());
-        if (TextUtils.isEmpty(tmp)) {
-            return null;
-        }
-        String[] urlArray = tmp.split("&");
-        if (urlArray.length < 1) {
-            return null;
-        }
-        for (int i = 0; i < urlArray.length; i++) {
-            String[] params = urlArray[i].split("=");
-            if (params.length != 2) {
-                return null;
+        javaMethod.object = authority;
+        javaMethod.methodName = decodeUri.getQueryParameter("fun");
+        for (String name : params) {
+            if ("fun".equals(name)) {
+                continue;
             }
-            if (i == 0) {
-                javaMethod.methodName = params[1];
-            } else {
-                javaMethod.params.put(params[0], params[1]);
-            }
+            javaMethod.params.put(name, decodeUri.getQueryParameter(name));
         }
         return javaMethod;
     }
