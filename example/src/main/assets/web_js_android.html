@@ -17,6 +17,7 @@
             <p><input type="button" value="JsCallJavaByPrompt" onclick="testJsCallJavaByPrompt();"/></p>
             <p><input type="button" value="JsCallJavaByJavascriptInterface" onclick="testJsCallJavaByJavascriptInterface();"/></p>
             <p><input type="button" value="JsCallJavaByShouldOverrideUrlLoading" onclick="testJsCallJavaByShouldOverrideUrlLoading();"/></p>
+            <a href="jtscheme://hello2?a=1&b=c">ShouldOverrideUrlLoading</a>
             <p><input type="button" value="finishSelf" onclick="finishSelf();"/></p>
         </div>
     </div>
@@ -47,7 +48,8 @@
 
             <!--WebViewClient-->
 			function testJsCallJavaByShouldOverrideUrlLoading(){
-			    document.location = "jtscheme://hello"
+			    //document.location = "jtscheme://hello"
+			    window.location.href = "jtscheme://hello"
 			}
 
 

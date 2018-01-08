@@ -22,7 +22,6 @@ import java.util.regex.Pattern;
 
 public class CompatWebView extends WebView {
 
-    private boolean isInjectCompatJsFlag = false;
     private static final String DEFAULT_SCHEME = "CompatScheme";
     private static final String JAVASCRIPT_ANNOTATION = "@android.webkit.JavascriptInterface()";
     private String scheme;
@@ -70,17 +69,6 @@ public class CompatWebView extends WebView {
         }
     }
 
-    private void initCompatJs() {
-        if (!isInjectCompatJsFlag) {
-            isInjectCompatJsFlag = true;
-            String initIFrame = "compatMsgIFrame = document.createElement('iframe');\n" +
-                    "            compatMsgIFrame.style.display = 'none';\n" +
-                    "            document.documentElement.appendChild(compatMsgIFrame);";
-            compatEvaluateJavascript(initIFrame);
-        }
-    }
-
-
     private void injectJsInterfaceForCompat(Object object, String name) {
         Class clazz = object.getClass();
         Method[] methods = clazz.getDeclaredMethods();
@@ -117,7 +105,7 @@ public class CompatWebView extends WebView {
                 }
             }
 
-            sb.append("); compatMsgIFrame.src =\"").append(scheme).append("://\"").append("+schemeEncode;};");
+            sb.append("); window.location.href =\"").append(scheme).append("://\"").append("+schemeEncode;};");
         }
         compatEvaluateJavascript(sb.toString());
     }
@@ -151,10 +139,6 @@ public class CompatWebView extends WebView {
     }
 
     public void onPageFinished(String url) {
-        if (injectHashMap.size() == 0) {
-            return;
-        }
-        initCompatJs();
         for (String name : injectHashMap.keySet()) {
             Object object = injectHashMap.get(name);
             injectJsInterfaceForCompat(object, name);
