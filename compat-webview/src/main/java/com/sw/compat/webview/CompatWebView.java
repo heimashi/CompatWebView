@@ -285,7 +285,7 @@ public class CompatWebView extends WebView {
             }
             Class<?> clazz = injectInstance.getClass();
             try {
-                Method method = clazz.getDeclaredMethod(methodName, paramType);
+                Method method = clazz.getMethod(methodName, paramType);
                 if (checkMethodValid(method)) {
                     method.setAccessible(true);
                     method.invoke(injectInstance, paramObj);
