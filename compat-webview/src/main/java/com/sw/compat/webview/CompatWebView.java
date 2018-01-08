@@ -40,6 +40,9 @@ public class CompatWebView extends WebView {
 
     private void init() {
         scheme = DEFAULT_SCHEME.toLowerCase();
+        removeJavascriptInterface("searchBoxJavaBridge_");
+        removeJavascriptInterface("accessibility");
+        removeJavascriptInterface("accessibilityTraversal");
         setWebViewClient(new CompatWebViewClient());
     }
 
@@ -140,7 +143,7 @@ public class CompatWebView extends WebView {
         return false;
     }
 
-    public void onPageFinished(String url) {
+    public void onPageFinished() {
         for (String name : injectHashMap.keySet()) {
             Object object = injectHashMap.get(name);
             injectJsInterfaceForCompat(object, name);

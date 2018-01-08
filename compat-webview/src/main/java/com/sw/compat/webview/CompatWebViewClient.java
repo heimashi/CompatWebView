@@ -24,7 +24,7 @@ public class CompatWebViewClient extends WebViewClient {
         super.onPageFinished(view, url);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
             if (view instanceof CompatWebView) {
-                ((CompatWebView) view).onPageFinished(url);
+                ((CompatWebView) view).onPageFinished();
             }
         }
 
