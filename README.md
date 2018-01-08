@@ -71,48 +71,52 @@ webView.setWebViewClient(new CompatWebViewClient(){
 - 通过WebChromeClient，这种有四种方式prompt(提示框)、alert(警告框)、confirm(确认框)、console(log控制台)
     - Android端实现WebChromeClient
     ```java
-          webView.setWebChromeClient(new WebChromeClient() {
-                @Override
-                public boolean onJsPrompt(WebView view, String url, String message, String defaultValue, JsPromptResult result) {
-                    Uri uri = Uri.parse(message);
-                    if (SCHEME.equals(uri.getScheme())) {
-                        String authority = uri.getAuthority();
-                        Set<String> params = uri.getQueryParameterNames();
-                        for (String s : params) {
-                            Log.i("COMPAT_WEB", s + ":" + uri.getQueryParameter(s));
-                        }
-                        Toast.makeText(MyApp.application, "Prompt::" + authority, Toast.LENGTH_SHORT).show();
-                    }
-                    return super.onJsPrompt(view, url, message, defaultValue, result);
-                }
+    webView.setWebChromeClient(new WebChromeClient() {
+        @Override
+        public boolean onJsPrompt(WebView view, String url, String message, String defaultValue, JsPromptResult result) {
+             Uri uri = Uri.parse(message);
+             if (SCHEME.equals(uri.getScheme())) {
+                  String authority = uri.getAuthority();
+                  Set<String> params = uri.getQueryParameterNames();
+                  for (String s : params) {
+                      Log.i("COMPAT_WEB", s + ":" + uri.getQueryParameter(s));
+                  }
+                  Toast.makeText(MyApp.application, "Prompt::" + authority, Toast.LENGTH_SHORT).show();
+             }
+             return super.onJsPrompt(view, url, message, defaultValue, result);
+        }
     
-                @Override
-                public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
-                    Toast.makeText(MyApp.application, "Alert::" + message, Toast.LENGTH_SHORT).show();
-                    return super.onJsAlert(view, url, message, result);
-                }
+        @Override
+        public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
+             Toast.makeText(MyApp.application, "Alert::" + message, Toast.LENGTH_SHORT).show();
+             return super.onJsAlert(view, url, message, result);
+        }
     
-                @Override
-                public boolean onJsConfirm(WebView view, String url, String message, JsResult result) {
-                    Toast.makeText(MyApp.application, "Confirm::" + message, Toast.LENGTH_SHORT).show();
-                    return super.onJsConfirm(view, url, message, result);
-                }
+        @Override
+        public boolean onJsConfirm(WebView view, String url, String message, JsResult result) {
+             Toast.makeText(MyApp.application, "Confirm::" + message, Toast.LENGTH_SHORT).show();
+             return super.onJsConfirm(view, url, message, result);
+       }
     
-                @Override
-                public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
-                    Toast.makeText(MyApp.application, "Console::" + consoleMessage.message(), Toast.LENGTH_SHORT).show();
-                    return super.onConsoleMessage(consoleMessage);
-                }
-            });
+       @Override
+       public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+             Toast.makeText(MyApp.application, "Console::" + consoleMessage.message(), Toast.LENGTH_SHORT).show();
+             return super.onConsoleMessage(consoleMessage);
+       }
+    });
     ```
     - JS端调用
     ```javascript
-    	console.log("say hello by console");
+    console.log("say hello by console");
     
-        alert("say hello by alert");
+    alert("say hello by alert");
     
-        confirm("say hello by confirm");
+    confirm("say hello by confirm");
     
-        window.prompt("jtscheme://hello?a=1&b=hi");
+    window.prompt("jtscheme://hello?a=1&b=hi");
     ```
-        
+Android native与JavaScript通信的方式有两种loadUrl()和evaluateJavascript()
+```java
+webView.loadUrl("javascript:" + javascript);
+webView.evaluateJavascript("javascript:" + javascript, null);
+```
