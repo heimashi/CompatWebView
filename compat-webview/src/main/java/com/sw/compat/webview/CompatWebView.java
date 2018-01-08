@@ -21,7 +21,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-
+/**
+ * Compatible WebView for addJavascriptInterface below Android 4.2
+ *
+ * @author shiwang
+ */
 public class CompatWebView extends WebView {
 
     private static final String DEFAULT_SCHEME = "CompatScheme";
@@ -46,6 +50,11 @@ public class CompatWebView extends WebView {
         setWebViewClient(new CompatWebViewClient());
     }
 
+    /**
+     * 设置新的scheme，默认的scheme名是CompatScheme
+     *
+     * @param scheme scheme名
+     **/
     public void setScheme(String scheme) {
         if (TextUtils.isEmpty(scheme)) {
             return;
@@ -53,10 +62,20 @@ public class CompatWebView extends WebView {
         this.scheme = scheme.toLowerCase();
     }
 
+    /**
+     * 获取当前的scheme，默认的scheme名是CompatScheme
+     *
+     * @return String 当前的scheme名
+     **/
     public String getScheme() {
         return scheme;
     }
 
+    /**
+     * 从native调用javascript，api18以下执行loadUrl，以上的执行evaluateJavascript，更加高效
+     *
+     * @param javascript javascript代码
+     **/
     public void compatEvaluateJavascript(String javascript) {
         if (Build.VERSION.SDK_INT <= 18) {
             loadUrl("javascript:" + javascript);
@@ -65,6 +84,14 @@ public class CompatWebView extends WebView {
         }
     }
 
+    /**
+     * 从js端调用java方法，api17以下有安全漏洞，参考https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2012-6636
+     * compatAddJavascriptInterface兼容性的解决了安全问题，17及之上沿用原api，17之下走封装的通道
+     *
+     * @param object the Java object to inject into this WebView's JavaScript
+     *               context. Null values are ignored.
+     * @param name the name used to expose the object in JavaScript
+     **/
     @SuppressLint({"JavascriptInterface", "AddJavascriptInterface"})
     public void compatAddJavascriptInterface(Object object, String name) {
         if (Build.VERSION.SDK_INT >= 17) {
@@ -127,7 +154,7 @@ public class CompatWebView extends WebView {
         return false;
     }
 
-    public boolean shouldOverrideUrlLoading(String url) {
+    boolean shouldOverrideUrlLoading(String url) {
         try {
             String urlDecode = URLDecoder.decode(url, "UTF-8");
             if (urlDecode.startsWith(scheme)) {
@@ -143,7 +170,7 @@ public class CompatWebView extends WebView {
         return false;
     }
 
-    public void onPageFinished() {
+    void onPageFinished() {
         for (String name : injectHashMap.keySet()) {
             Object object = injectHashMap.get(name);
             injectJsInterfaceForCompat(object, name);

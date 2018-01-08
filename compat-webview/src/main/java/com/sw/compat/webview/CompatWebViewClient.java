@@ -5,6 +5,11 @@ import android.os.Build;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+/**
+ * CompatWebViewClient用于将低于api17的消息转发给CompatWebView
+ *
+ * @author shiwang
+ */
 public class CompatWebViewClient extends WebViewClient {
 
     @Override
