@@ -103,7 +103,7 @@ public class CompatWebView extends WebView {
 
     private void injectJsInterfaceForCompat(Object object, String name) {
         Class clazz = object.getClass();
-        Method[] methods = clazz.getDeclaredMethods();
+        Method[] methods = clazz.getMethods();
         if (methods == null) {
             return;
         }
