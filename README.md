@@ -12,7 +12,7 @@ CompatWebView做到了对客户端开发透明，复用了原来addJavaScriptInt
 How to use
 -----------
 [使用案例](https://github.com/heimashi/CompatWebView/blob/master/example/src/main/java/com/sw/bridge/CompatWebViewActivity.java)
-- 1、用CompatWebView替换原来的WebView，在需要调用addJavaScriptInterface()的地方调用替换成方法compatAddJavascriptInterface()
+- 1、用CompatWebView替换原来的WebView，在需要调用addJavaScriptInterface()的地方替换成方法compatAddJavascriptInterface()
 ```java
 webView.compatAddJavascriptInterface(new JInterface(), "JInterface");
 ```
@@ -22,3 +22,97 @@ webView.setWebViewClient(new CompatWebViewClient(){
     
 });
 ```
+
+原理介绍
+-------
+### JavaScript与Android通信方式总结
+总的来说JavaScript与Android native通信的方式有三大类：[使用案例](https://github.com/heimashi/CompatWebView/blob/master/example/src/main/java/com/sw/bridge/CommunicateWebViewActivity.java)
+- 通过JavaScriptInterface注入java对象
+    - Android端注入
+    ```java
+      webView.addJavascriptInterface(new JInterface(), "JInterface");
+
+      private static class JInterface {
+        @JavascriptInterface
+        public void testJsCallJava(String msg, int i) {
+            Toast.makeText(MyApp.application, msg + ":" + (i + 20), Toast.LENGTH_SHORT).show();
+        }
+      }
+    ```
+    - JS端调用
+    ```javascript
+    JInterface.testJsCallJava("hello", 666)
+    ```
+- 通过WebViewClient，实现shouldOverrideUrlLoading
+    - Android端WebViewClient，复写shouldOverrideUrlLoading
+    ```java
+    webView.setWebViewClient(new WebViewClient() {
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            try {
+               url = URLDecoder.decode(url, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+               e.printStackTrace();
+            }
+            if (url.startsWith(SCHEME)) {
+               Toast.makeText(CommunicateWebViewActivity.this, url, Toast.LENGTH_SHORT).show();
+               return true;
+            }
+               return super.shouldOverrideUrlLoading(view, url);
+            }
+     }
+    ```
+    - JS端调用
+    ```javascript
+        document.location = "jtscheme://hello"
+        window.location.href = "jtscheme://hello"
+        <a href="jtscheme://hello2?a=1&b=c">ShouldOverrideUrlLoading</a>
+    ```
+- 通过WebChromeClient，这种有四种方式prompt(提示框)、alert(警告框)、confirm(确认框)、console(log控制台)
+    - Android端实现WebChromeClient
+    ```java
+          webView.setWebChromeClient(new WebChromeClient() {
+                @Override
+                public boolean onJsPrompt(WebView view, String url, String message, String defaultValue, JsPromptResult result) {
+                    Uri uri = Uri.parse(message);
+                    if (SCHEME.equals(uri.getScheme())) {
+                        String authority = uri.getAuthority();
+                        Set<String> params = uri.getQueryParameterNames();
+                        for (String s : params) {
+                            Log.i("COMPAT_WEB", s + ":" + uri.getQueryParameter(s));
+                        }
+                        Toast.makeText(MyApp.application, "Prompt::" + authority, Toast.LENGTH_SHORT).show();
+                    }
+                    return super.onJsPrompt(view, url, message, defaultValue, result);
+                }
+    
+                @Override
+                public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
+                    Toast.makeText(MyApp.application, "Alert::" + message, Toast.LENGTH_SHORT).show();
+                    return super.onJsAlert(view, url, message, result);
+                }
+    
+                @Override
+                public boolean onJsConfirm(WebView view, String url, String message, JsResult result) {
+                    Toast.makeText(MyApp.application, "Confirm::" + message, Toast.LENGTH_SHORT).show();
+                    return super.onJsConfirm(view, url, message, result);
+                }
+    
+                @Override
+                public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+                    Toast.makeText(MyApp.application, "Console::" + consoleMessage.message(), Toast.LENGTH_SHORT).show();
+                    return super.onConsoleMessage(consoleMessage);
+                }
+            });
+    ```
+    - JS端调用
+    ```javascript
+    	console.log("say hello by console");
+    
+        alert("say hello by alert");
+    
+        confirm("say hello by confirm");
+    
+        window.prompt("jtscheme://hello?a=1&b=hi");
+    ```
+        
