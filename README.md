@@ -3,6 +3,7 @@ CompatWebView
 
 CompatWebView是为了解决WebView的JavaScriptInterface注入漏洞
 - [漏洞介绍：CVE-2012-6636](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2012-6636)
+- 官方说明: https://developer.android.com/reference/android/webkit/WebView.html#addJavascriptInterface(java.lang.Object, java.lang.String)
 
 - 在Android的api小于17（android4.2）调用addJavaScriptInterface注入java对象会有安全风险，可以通过js注入反射调用到Java层的方法，造成安全隐患。[漏洞验证案例](https://github.com/heimashi/CompatWebView/blob/master/example/src/main/java/com/sw/bridge/InjectWebViewActivity.java)
 
@@ -23,8 +24,8 @@ webView.setWebViewClient(new CompatWebViewClient(){
 });
 ```
 
-原理介绍
--------
+通信方式总结
+-----------
 ### JavaScript与Android通信方式总结
 总的来说JavaScript与Android native通信的方式有三大类：[使用案例](https://github.com/heimashi/CompatWebView/blob/master/example/src/main/java/com/sw/bridge/CommunicateWebViewActivity.java)
 - 通过JavaScriptInterface注入java对象
@@ -118,5 +119,13 @@ webView.setWebViewClient(new CompatWebViewClient(){
 Android native与JavaScript通信的方式有两种loadUrl()和evaluateJavascript()
 ```java
 webView.loadUrl("javascript:" + javascript);
-webView.evaluateJavascript("javascript:" + javascript, null);
+webView.evaluateJavascript(javascript, null);
 ```
+- evaluateJavascript(String script, ValueCallback<String> resultCallback)
+- Asynchronously evaluates JavaScript in the context of the currently displayed page.[官方说明](https://developer.android.com/reference/android/webkit/WebView.html#evaluateJavascript%28java.lang.String,%20android.webkit.ValueCallback%3Cjava.lang.String%3E%29)
+- loadUrl()在低于18的版本中使用，在大于等于19版本中，应该使用evaluateJavascript()，[官方迁移说明](https://developer.android.com/guide/webapps/migrating.html)
+    
+CompatWebView实现原理
+---------------------
+
+
