@@ -3,10 +3,9 @@ package com.sw.bridge;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.webkit.JavascriptInterface;
-import android.webkit.JsPromptResult;
-import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.widget.Toast;
@@ -31,17 +30,7 @@ public class CompatWebViewActivity extends Activity {
         webView = findViewById(R.id.web_view);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setDefaultTextEncodingName("utf-8");
-        webView.setWebChromeClient(new WebChromeClient() {
-            @Override
-            public boolean onJsPrompt(WebView view, String url, String message, String defaultValue, JsPromptResult result) {
-                return super.onJsPrompt(view, url, message, defaultValue, result);
-            }
-
-            @Override
-            public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
-                return super.onJsAlert(view, url, message, result);
-            }
-        });
+        webView.setWebChromeClient(new WebChromeClient());
         webView.setWebViewClient(new CompatWebViewClient() {
 
             @Override
@@ -52,7 +41,7 @@ public class CompatWebViewActivity extends Activity {
             }
         });
         webView.compatAddJavascriptInterface(new JInterface(), "JInterface");
-        webView.loadUrl("file:///android_asset/web_test.html");
+        webView.loadUrl("file:///android_asset/web_compat.html");
 
     }
 
@@ -69,8 +58,14 @@ public class CompatWebViewActivity extends Activity {
 
         @JavascriptInterface
         @SuppressWarnings("unused")
-        public void testJsCallJava2(String msg, double i, float j) {
-            Toast.makeText(MyApp.application, msg + "::" + (i + j), Toast.LENGTH_SHORT).show();
+        public void toInjectWebViewActivity() {
+            MyApp.application.startActivity(new Intent(MyApp.application, InjectWebViewActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        }
+
+        @JavascriptInterface
+        @SuppressWarnings("unused")
+        public void toCommunicateWebViewActivity() {
+            MyApp.application.startActivity(new Intent(MyApp.application, CommunicateWebViewActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         }
     }
 

@@ -6,7 +6,6 @@ import android.content.Context;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.webkit.WebView;
 
 import java.io.UnsupportedEncodingException;
@@ -19,6 +18,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.regex.Pattern;
+
 
 public class CompatWebView extends WebView {
 
@@ -138,7 +138,6 @@ public class CompatWebView extends WebView {
         try {
             String urlDecode = URLDecoder.decode(url, "UTF-8");
             if (urlDecode.startsWith(scheme)) {
-                log(urlDecode);
                 JavaMethod javaMethod = decodeMethodFromUrl(urlDecode);
                 if (javaMethod == null) {
                     return false;
@@ -152,7 +151,6 @@ public class CompatWebView extends WebView {
     }
 
     public void onPageFinished(String url) {
-        Log.i("tag", "+++++" + url);
         initCompatJs();
         for (String name : injectHashMap.keySet()) {
             Object object = injectHashMap.get(name);
@@ -191,7 +189,6 @@ public class CompatWebView extends WebView {
                 javaMethod.params.put(params[0], params[1]);
             }
         }
-        log("m:" + javaMethod.toString());
         return javaMethod;
     }
 
@@ -241,7 +238,7 @@ public class CompatWebView extends WebView {
                 return Float.parseFloat(obj);
             } else if (type == double.class) {
                 return Double.parseDouble(obj);
-            } else if (type == char.class) {
+            } else if (type == char.class && obj != null && obj.length() == 1) {
                 return obj.charAt(0);
             }
             return obj;
@@ -251,7 +248,6 @@ public class CompatWebView extends WebView {
             Class<?>[] paramType = new Class[params.size()];
             Object[] paramObj = new Object[params.size()];
             dfs(injectHashMap, 0, paramType, paramObj);
-            log("+++++f:" + isFindMethod);
             return isFindMethod;
         }
 
@@ -266,7 +262,6 @@ public class CompatWebView extends WebView {
             }
             String key = (String) params.keySet().toArray()[index];
             List<Class<?>> keyTypes = getParamTypes(params.get(key));
-            log("key:" + key + ":: " + keyTypes);
             for (int i = 0; i < keyTypes.size(); i++) {
                 paramType[index] = keyTypes.get(i);
                 paramObj[index] = convertByType(params.get(key), keyTypes.get(i));
@@ -276,13 +271,6 @@ public class CompatWebView extends WebView {
 
 
         private void tryToInvoke(HashMap<String, Object> injectHashMap, Class<?>[] paramType, Object[] paramObj) {
-            if (paramType != null) {
-                StringBuilder sb = new StringBuilder("PARAMS:");
-                for (int i = 0; i < paramType.length; i++) {
-                    sb.append(paramType[i]).append(":").append(paramObj[i]).append(",");
-                }
-                log(sb.toString());
-            }
             Object injectInstance = injectHashMap.get(object);
             if (injectInstance == null) {
                 return;
@@ -316,7 +304,4 @@ public class CompatWebView extends WebView {
     }
 
 
-    private static void log(String msg) {
-        Log.i("WEB_", msg);
-    }
 }

@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <title>Js与Android交互案例</title>
+    <title>使用CompatWebView避免Android4.2以下的JavascriptInterface注入漏洞</title>
     <meta name="viewport"
           content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no"/>
 </head>
@@ -10,9 +10,10 @@
 <div class="MiniWrap">
     <div class="article-detail">
         <div class="body">
-            <div class="title">Js与Android交互案例</div>
-            <p><input type="button" value="testJsCallJava" onclick="testJsCallJava();"/></p>
-            <p><input type="button" value="testJsCallJava2" onclick="testJsCallJava2();"/></p>
+            <div class="title">使用CompatWebView避免Android4.2以下的JavascriptInterface注入漏洞</div>
+            <p><input type="button" value="test JsCallJava" onclick="testJsCallJava();"/></p>
+            <p><input type="button" value="To InjectWebViewActivity" onclick="toInjectWebViewActivity();"/></p>
+            <p><input type="button" value="To CommunicateWebViewActivity" onclick="toCommunicateWebViewActivity();"/></p>
         </div>
     </div>
 
@@ -26,8 +27,12 @@
 			    JInterface.testJsCallJava("jsCallJava success", 20)
 			}
 
-			function testJsCallJava2(){
-			    JInterface.testJsCallJava2("jsCallJava2 success", 10.5, 4)
+			function toInjectWebViewActivity(){
+			    JInterface.toInjectWebViewActivity()
+			}
+
+			function toCommunicateWebViewActivity(){
+			    JInterface.toCommunicateWebViewActivity()
 			}
 
 

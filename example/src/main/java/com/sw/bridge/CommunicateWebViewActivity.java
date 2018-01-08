@@ -13,7 +13,6 @@ import android.webkit.JsPromptResult;
 import android.webkit.JsResult;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
-import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
@@ -22,7 +21,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Set;
 
-public class WebViewActivity extends Activity {
+public class CommunicateWebViewActivity extends Activity {
 
     private WebView webView;
     private static final String SCHEME = "jtscheme";
@@ -82,7 +81,7 @@ public class WebViewActivity extends Activity {
                     e.printStackTrace();
                 }
                 if (url.startsWith(SCHEME)) {
-                    Toast.makeText(WebViewActivity.this, url, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(CommunicateWebViewActivity.this, url, Toast.LENGTH_SHORT).show();
                     return true;
                 }
                 return super.shouldOverrideUrlLoading(view, url);

