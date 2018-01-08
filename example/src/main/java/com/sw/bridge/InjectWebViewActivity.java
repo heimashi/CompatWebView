@@ -4,6 +4,7 @@ package com.sw.bridge;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
+import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
@@ -26,7 +27,13 @@ public class InjectWebViewActivity extends Activity {
         WebView webView = findViewById(R.id.web_view);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setDefaultTextEncodingName("utf-8");
-        webView.setWebChromeClient(new WebChromeClient());
+        webView.setWebChromeClient(new WebChromeClient(){
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+                Toast.makeText(MyApp.application, "Console::" + consoleMessage.message(), Toast.LENGTH_SHORT).show();
+                return super.onConsoleMessage(consoleMessage);
+            }
+        });
         webView.setWebViewClient(new WebViewClient());
         webView.addJavascriptInterface(new JInterface(), "JInterface");
         webView.loadUrl("file:///android_asset/web_inject.html");

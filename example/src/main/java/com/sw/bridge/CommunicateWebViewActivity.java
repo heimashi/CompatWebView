@@ -46,7 +46,7 @@ public class CommunicateWebViewActivity extends Activity {
                     String authority = uri.getAuthority();
                     Set<String> params = uri.getQueryParameterNames();
                     for (String s : params) {
-                        Log.i("WEB_", s + ":" + uri.getQueryParameter(s));
+                        Log.i("COMPAT_WEB", s + ":" + uri.getQueryParameter(s));
                     }
                     Toast.makeText(MyApp.application, "Prompt::" + authority, Toast.LENGTH_SHORT).show();
                 }
@@ -112,11 +112,17 @@ public class CommunicateWebViewActivity extends Activity {
         }
     }
 
-    public static class JInterface {
+    public class JInterface {
         @JavascriptInterface
         @SuppressWarnings("unused")
         public void testJsCallJava(String msg, int i) {
             Toast.makeText(MyApp.application, msg + ":" + (i + 20), Toast.LENGTH_SHORT).show();
+        }
+
+        @JavascriptInterface
+        @SuppressWarnings("unused")
+        public void finishSelf() {
+            CommunicateWebViewActivity.this.finish();
         }
     }
 
