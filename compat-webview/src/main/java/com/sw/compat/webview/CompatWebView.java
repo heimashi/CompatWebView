@@ -87,12 +87,12 @@ public class CompatWebView extends WebView {
         if (methods == null) {
             return;
         }
-        StringBuilder sb = new StringBuilder("window.JInterface = {};");
+        StringBuilder sb = new StringBuilder("window.").append(name).append(" = {};");
         for (Method method : methods) {
             if (!checkMethodValid(method)) {
                 return;
             }
-            sb.append("window.JInterface.");
+            sb.append("window.").append(name).append(".");
             sb.append(method.getName()).append(" = function(");
             Class<?>[] parameterTypes = method.getParameterTypes();
             int paramSize = parameterTypes.length;
@@ -151,6 +151,9 @@ public class CompatWebView extends WebView {
     }
 
     public void onPageFinished(String url) {
+        if (injectHashMap.size() == 0) {
+            return;
+        }
         initCompatJs();
         for (String name : injectHashMap.keySet()) {
             Object object = injectHashMap.get(name);
