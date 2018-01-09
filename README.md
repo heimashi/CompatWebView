@@ -142,8 +142,8 @@ CompatWebView在api17及其以上延用了在addJavaScriptInterface，在小于a
     ```
 - 4.将上面的js调用webView.loadUrl()注入到网页中
 - 5.前端在需要调用的地方跟之前一样去调用
-    ```javascript
-    JInterface.testJsCallJava("jsCallJava success", 20)
-    ```
+```javascript
+JInterface.testJsCallJava("jsCallJava success", 20)
+```
 - 6.执行上面的js后Android端在shouldOverrideUrlLoading通道就会收到scheme，从scheme中解析出对象和对应的方法，然后再反射调用对应的方法就完成了本次通信
 
