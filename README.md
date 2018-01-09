@@ -147,3 +147,13 @@ JInterface.testJsCallJava("jsCallJava success", 20)
 ```
 - 6.执行上面的js后Android端在shouldOverrideUrlLoading通道就会收到scheme，从scheme中解析出对象和对应的方法，然后再反射调用对应的方法就完成了本次通信
 
+其他WebView漏洞
+--------------
+[CVE-2013-4710](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2013-4710)
+[CVE-2014-1939](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-1939)
+[CVE-2014-7224](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-7224)
+```java
+removeJavascriptInterface("searchBoxJavaBridge_");
+removeJavascriptInterface("accessibility");
+removeJavascriptInterface("accessibilityTraversal");
+```
