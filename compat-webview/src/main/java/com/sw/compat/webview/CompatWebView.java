@@ -80,7 +80,7 @@ public class CompatWebView extends WebView {
         if (Build.VERSION.SDK_INT <= 18) {
             loadUrl("javascript:" + javascript);
         } else {
-            evaluateJavascript("javascript:" + javascript, null);
+            evaluateJavascript(javascript, null);
         }
     }
 
@@ -110,7 +110,7 @@ public class CompatWebView extends WebView {
         StringBuilder sb = new StringBuilder("window.").append(name).append(" = {};");
         for (Method method : methods) {
             if (!checkMethodValid(method)) {
-                return;
+                continue;
             }
             sb.append("window.").append(name).append(".");
             sb.append(method.getName()).append(" = function(");

@@ -125,7 +125,15 @@ webView.evaluateJavascript(javascript, null);
 - evaluateJavascript(String script, ValueCallback<String> resultCallback)
 - Asynchronously evaluates JavaScript in the context of the currently displayed page.[官方说明](https://developer.android.com/reference/android/webkit/WebView.html#evaluateJavascript%28java.lang.String,%20android.webkit.ValueCallback%3Cjava.lang.String%3E%29)
 - loadUrl()在低于18的版本中使用，在大于等于19版本中，应该使用evaluateJavascript()，[官方迁移说明](https://developer.android.com/guide/webapps/migrating.html)
-
+```java
+public void compatEvaluateJavascript(String javascript) {
+    if (Build.VERSION.SDK_INT <= 18) {
+        loadUrl("javascript:" + javascript);
+    } else {
+        evaluateJavascript(javascript, null);
+    }
+}
+```
 
 CompatWebView实现原理
 --------------------
@@ -152,6 +160,7 @@ JInterface.testJsCallJava("jsCallJava success", 20)
 [CVE-2013-4710](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2013-4710)
 [CVE-2014-1939](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-1939)
 [CVE-2014-7224](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-7224)
+- 解决方案
 ```java
 removeJavascriptInterface("searchBoxJavaBridge_");
 removeJavascriptInterface("accessibility");
