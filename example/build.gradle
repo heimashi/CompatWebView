@@ -4,7 +4,7 @@ android {
     compileSdkVersion 26
     defaultConfig {
         applicationId "com.sw.bridge"
-        minSdkVersion 10
+        minSdkVersion 14
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
@@ -20,4 +20,6 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':compat-webview')
+    //implementation 'com.sw.compat.webview:compat-webview:1.0.0'
+
 }
