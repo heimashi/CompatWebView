@@ -13,11 +13,15 @@ CompatWebView做到了对客户端开发透明，复用了原来addJavaScriptInt
 How to use
 -----------
 [使用案例](https://github.com/heimashi/CompatWebView/blob/master/example/src/main/java/com/sw/bridge/CompatWebViewActivity.java)
-- 1、用CompatWebView替换原来的WebView，在需要调用addJavaScriptInterface()的地方替换成方法compatAddJavascriptInterface()
+- 1、添加依赖
+```groovy
+implementation 'com.sw.compat.webview:compat-webview:1.0.0'
+```
+- 2、用CompatWebView替换原来的WebView，在需要调用addJavaScriptInterface()的地方替换成方法compatAddJavascriptInterface()
 ```java
 webView.compatAddJavascriptInterface(new JInterface(), "JInterface");
 ```
-- 2、如果需要自定义WebViewClient的话，必须继承自CompatWebViewClient，如果不自定义的话可以省掉此步骤
+- 3、如果需要自定义WebViewClient的话，必须继承自CompatWebViewClient来替换原来的WebViewClient，如果不自定义的话可以省掉此步骤
 ```java
 webView.setWebViewClient(new CompatWebViewClient(){
     
