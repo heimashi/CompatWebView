@@ -4,7 +4,7 @@ android {
     compileSdkVersion 26
     defaultConfig {
         applicationId "com.sw.bridge"
-        minSdkVersion 14
+        minSdkVersion 10
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
